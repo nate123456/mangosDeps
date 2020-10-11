@@ -1,27 +1,22 @@
 /**
- @file platform.h
+  \file G3D-base.lib/include/G3D-base/platform.h
 
- \#defines for platform specific issues.
+  G3D Innovation Engine http://casual-effects.com/g3d
+  Copyright 2000-2019, Morgan McGuire
+  All rights reserved
+  Available under the BSD License
+*/
 
- @maintainer Morgan McGuire, http://graphics.cs.williams.edu
-
- @created 2003-06-09
- @edited  2010-08-11
- */
-
-#ifndef G3D_platform_h
+#pragma once
 #define G3D_platform_h
 
 /**
- The version number of G3D in the form: MmmBB -> 
+ \def G3D_VER
+
+ The version number of G3D in the form: MmmBB ->
  version M.mm [beta BB]
  */
-#define G3D_VER 80100
-
-// fatal error for unsupported architectures
-#if defined(__powerpc__)
-#   error PowerPC is not supported by G3D!
-#endif
+#define G3D_VER 100100
 
 #if defined(G3D_RELEASEDEBUG)
 #   define G3D_DEBUGRELEASE
@@ -31,91 +26,65 @@
 #   undef _DEBUG
 #endif
 
-/** @def G3D_DEBUG()
+/** \def G3D_DEBUG
     Defined if G3D is built in debug mode. */
 #if !defined(G3D_DEBUG) && (defined(_DEBUG) || defined(G3D_DEBUGRELEASE))
 #   define G3D_DEBUG
 #endif
 
-/** These control the version of Winsock used by G3D.
-    Version 2.0 is standard for G3D 6.09 and later.
-    Version 1.1 is standard for G3D 6.08 and earlier.
- */
-#define G3D_WINSOCK_MAJOR_VERSION 2
-#define G3D_WINSOCK_MINOR_VERSION 0
+/** \def G3D_ARM 
+   Defined on ARM processors */
 
-#ifdef _MSC_VER 
-    #define G3D_WIN32
+/** \def G3D_X86
+   Defined on x86 processors */
+#if defined(__arm64__) || defined(__ARM_ARCH) || defined(__arm) || defined (__aarch64__)
+#    define G3D_ARM
+#elif defined(__x86_64__) || defined(__IA64__) || defined(_M_X64) || defined(_M_IA64)
+#    define G3D_X86
+#endif
+
+#if defined(__arm64__) || defined(__x86_64__) || defined(__IA64__) || defined(_M_X64) || defined(_M_IA64) || defined (__aarch64__)
+#    define G3D_64_BIT
+#endif
+
+
+/** \def G3D_WINDOWS Defined on Windows platforms*/
+/** \def G3D_FREEBSD Defined on FreeBSD and OpenBSD */
+/** \def G3D_LINUX Defined on Linux, FreeBSD and OpenBSD */
+/** \def G3D_OSX Defined on MacOS */
+
+#ifdef _MSC_VER
+#   define G3D_WINDOWS
+#elif defined(__APPLE__)
+#   define G3D_OSX
+
+    // Prevent OS X fp.h header from being included; it defines
+    // pi as a constant, which creates a conflict with G3D
+#   define __FP__
 #elif  defined(__FreeBSD__) || defined(__OpenBSD__)
     #define G3D_FREEBSD
     #define G3D_LINUX
 #elif defined(__linux__)
     #define G3D_LINUX
-#elif defined(__APPLE__)
-    #define G3D_OSX
-
-   // Prevent OS X fp.h header from being included; it defines
-   // pi as a constant, which creates a conflict with G3D
-#define __FP__
 #else
-    #error Unknown platform 
+    #error Unknown platform
 #endif
 
-// Detect 64-bit under various compilers
-#if (defined(_M_X64) || defined(_WIN64) || defined(__LP64__) || defined(_LP64))
-#    define G3D_64BIT
-#else
-#    define G3D_32BIT
-#endif
-
-// Strongly encourage inlining on gcc
-#ifdef __GNUC__
-#define inline __inline__
-#endif
-
-
-// Verify that the supported compilers are being used and that this is a known
-// processor.
-
-#ifdef G3D_LINUX
-#   ifndef __GNUC__
-#       error G3D only supports the gcc compiler on Linux.
+// Verify that the supported compilers are being used
+#if defined(G3D_LINUX) || defined(G3D_OSX)
+#   ifndef __clang__
+#       error G3D requires using clang to compile.
 #   endif
-#endif
-
-#ifdef G3D_OSX
-#    ifndef __GNUC__
-#        error G3D only supports the gcc compiler on OS X.
-#    endif
-    
-#    if defined(__i386__)
-#        define G3D_OSX_INTEL
-#    elif defined(__PPC__)
-#        define G3D_OSX_PPC
-#    else
-#        define G3D_OSX_UNKNOWN
-#    endif
-
 #endif
 
 
 #ifdef _MSC_VER
-// Microsoft Visual C++ 8.0 ("Express")       = 1400
-// Microsoft Visual C++ 7.1    ("2003") _MSC_VER = 1310
-// Microsoft Visual C++ 7.0    ("2002") _MSC_VER = 1300
-// Microsoft Visual C++ 6.0    _MSC_VER          = 1200
-// Microsoft Visual C++ 5.0    _MSC_VER          = 1100
-
 // Turn off warnings about deprecated C routines
 #   pragma warning (disable : 4996)
 
 // Turn off "conditional expression is constant" warning; MSVC generates this
 // for debug assertions in inlined methods.
 #  pragma warning (disable : 4127)
-
-/** @def G3D_DEPRECATED()
-    Creates deprecated warning. */
-#  define G3D_DEPRECATED __declspec(deprecated)
 
 // Prevent Winsock conflicts by hiding the winsock API
 #   ifndef _WINSOCKAPI_
@@ -125,16 +94,12 @@
 
 // Disable 'name too long for browse information' warning
 #   pragma warning (disable : 4786)
-// TODO: remove
-#   pragma warning (disable : 4244)
-
-// #   define ZLIB_WINAPI /* G3DFIX: caused some unresolved external errors with MSVC */
 
 #   define restrict
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
-#   define G3D_CHECK_PRINTF_ARGS 
+#   define G3D_CHECK_PRINTF_ARGS
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
@@ -142,7 +107,7 @@
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
-#   define G3D_CHECK_PRINTF_METHOD_ARGS 
+#   define G3D_CHECK_PRINTF_METHOD_ARGS
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
@@ -151,7 +116,7 @@
     // On MSVC, we need to link against the multithreaded DLL version of
     // the C++ runtime because that is what SDL and ZLIB are compiled
     // against.  This is not the default for MSVC, so we set the following
-    // defines to force correct linking.  
+    // defines to force correct linking.
     //
     // For documentation on compiler options, see:
     //  http://msdn.microsoft.com/library/default.asp?url=/library/en-us/vccore/html/_core_.2f.md.2c_2f.ml.2c_2f.mt.2c_2f.ld.asp
@@ -173,39 +138,23 @@
         #undef _STATIC_CPPLIB
     #endif
 
-    #ifdef _DEBUG
-        #pragma comment (linker, "/NODEFAULTLIB:LIBCMTD.LIB")
-        #pragma comment (linker, "/NODEFAULTLIB:LIBCPMTD.LIB")
-        #pragma comment (linker, "/NODEFAULTLIB:LIBCPD.LIB")
-        #pragma comment (linker, "/DEFAULTLIB:MSVCPRTD.LIB")
-        #pragma comment(linker, "/NODEFAULTLIB:LIBCD.LIB")
-        #pragma comment(linker, "/DEFAULTLIB:MSVCRTD.LIB")
-    #else
-        #pragma comment(linker, "/NODEFAULTLIB:LIBC.LIB")
-        #pragma comment(linker, "/DEFAULTLIB:MSVCRT.LIB")
-        #pragma comment (linker, "/NODEFAULTLIB:LIBCMT.LIB")
-        #pragma comment (linker, "/NODEFAULTLIB:LIBCPMT.LIB")
-        #pragma comment(linker, "/NODEFAULTLIB:LIBCP.LIB")
-        #pragma comment (linker, "/DEFAULTLIB:MSVCPRT.LIB")
-    #endif
-
-    // Now set up external linking
-
-#    ifdef _DEBUG
-        // zlib was linked against the release MSVCRT; force
-        // the debug version.
-#        pragma comment(linker, "/NODEFAULTLIB:MSVCRT.LIB")
-#     endif
+#ifdef _DEBUG
+    // Some of the support libraries are always built in Release.
+    // Make sure the debug runtime library is linked in
+    #pragma comment(linker, "/NODEFAULTLIB:MSVCRT.LIB")
+    #pragma comment(linker, "/NODEFAULTLIB:MSVCPRT.LIB")
+#endif
 
 
 #    ifndef WIN32_LEAN_AND_MEAN
 #       define WIN32_LEAN_AND_MEAN 1
 #    endif
 
-
-#   define NOMINMAX 1
+#   ifndef NOMINMAX
+#       define NOMINMAX 1
+#   endif
 #   ifndef _WIN32_WINNT
-#       define _WIN32_WINNT 0x0500
+#       define _WIN32_WINNT 0x0602
 #   endif
 #   include <windows.h>
 #   undef WIN32_LEAN_AND_MEAN
@@ -217,8 +166,9 @@
 #   endif
 
 
-/** @def G3D_START_AT_MAIN()
-    Defines necessary wrapper around WinMain on Windows to allow transfer of execution to main(). */
+/** \def G3D_START_AT_MAIN()
+    Makes Windows programs using the WINDOWS subsystem invoke main() at program start by
+    defining a WinMain(). Does nothing on other operating systems.*/
 #   define G3D_START_AT_MAIN()\
 int WINAPI G3D_WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw);\
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
@@ -241,34 +191,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #        define restrict __restrict__
 #   endif
 
-/** @def G3D_DEPRECATED()
-    Creates deprecated warning. */
-#   define G3D_DEPRECATED __attribute__((__deprecated__))
-
-// setup function calling conventions
-#   if defined(__i386__) && ! defined(__x86_64__)
-
-#       ifndef __cdecl
-#           define __cdecl __attribute__((cdecl))
-#       endif
-
-#       ifndef __stdcall
-#           define __stdcall __attribute__((stdcall))
-#       endif
-
-#   elif defined(__x86_64__)
-
-#       ifndef __cdecl
-#           define __cdecl
-#       endif
-
-#       ifndef __stdcall
-#           define __stdcall
-#       endif
-#   elif defined(__arm__)
-        // CDECL does not apply to arm.
-#       define __cdecl
-#   endif // calling conventions
 
 /** @def G3D_CHECK_PRINTF_METHOD_ARGS()
     Enables printf parameter validation on gcc. */
@@ -288,18 +210,18 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #endif
 
 
-/** 
-  @def STR(expression)
+/**
+  \def STR(expression)
 
   Creates a string from the expression.  Frequently used with G3D::Shader
-  to express shading programs inline.  
+  to express shading programs inline.
 
   <CODE>STR(this becomes a string)\verbatim<PRE>\endverbatim evaluates the same as \verbatim<CODE>\endverbatim"this becomes a string"</CODE>
  */
 #define STR(x) #x
 
 /** @def PRAGMA(expression)
-    \#pragma may not appear inside a macro, so this uses the pragma operator 
+    \#pragma may not appear inside a macro, so this uses the pragma operator
     to create an equivalent statement.*/
 #ifdef _MSC_VER
 // Microsoft's version http://msdn.microsoft.com/en-us/library/d9x1s805.aspx
@@ -309,26 +231,131 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw) {\
 #    define PRAGMA(x) _Pragma(#x)
 #endif
 
-/** @def G3D_BEGIN_PACKED_CLASS(byteAlign)
-    Switch to tight alignment
+/** \def G3D_BEGIN_PACKED_CLASS(byteAlign)
+    Switch to tight alignment.
+
+    \code
+    G3D_BEGIN_PACKED_CLASS(1)
+    ThreeBytes {
+    public:
+        uint8 a, b, c;
+    }
+    G3D_END_PACKED_CLASS(1)
+    \endcode
+
+
     See G3D::Color3uint8 for an example.*/
-#ifdef _MSC_VER
-#    define G3D_BEGIN_PACKED_CLASS(byteAlign)  PRAGMA( pack(push, byteAlign) )
+#ifdef __GNUC__
+#    define G3D_BEGIN_PACKED_CLASS(byteAlign)  class __attribute((__packed__))
+#elif defined(_MSC_VER)
+#    define G3D_BEGIN_PACKED_CLASS(byteAlign)  PRAGMA( pack(push, byteAlign) ) class
 #else
-#    define G3D_BEGIN_PACKED_CLASS(byteAlign)
+#    define G3D_BEGIN_PACKED_CLASS(byteAlign)  class
 #endif
 
-/** @def G3D_END_PACKED_CLASS(byteAlign)
+/** \def G3D_END_PACKED_CLASS(byteAlign)
     End switch to tight alignment
+
     See G3D::Color3uint8 for an example.*/
-#ifdef _MSC_VER
-#    define G3D_END_PACKED_CLASS(byteAlign)  ; PRAGMA( pack(pop) )
-#elif defined(__GNUC__)
+#ifdef __GNUC__
 #    define G3D_END_PACKED_CLASS(byteAlign)  __attribute((aligned(byteAlign))) ;
-#else 
+#elif defined(_MSC_VER)
+#    define G3D_END_PACKED_CLASS(byteAlign)  ; PRAGMA( pack(pop) )
+#else
 #    define G3D_END_PACKED_CLASS(byteAlign)  ;
 #endif
 
+// Defining this supresses a warning in Visual Studio 2017 15.8+
+// where aligned_storage (used by shared_ptr) enables standards
+// conforming behavior of using the alignment of the ref counted objects
+// instead of being clamped to max_align_t as before.
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE
 
-// Header guard
+// Bring in shared_ptr and weak_ptr
+#include <memory>
+using std::shared_ptr;
+using std::weak_ptr;
+using std::dynamic_pointer_cast;
+using std::static_pointer_cast;
+using std::enable_shared_from_this;
+
+
+namespace G3D {
+    /** Options for initG3D and initGLG3D. */
+    class G3DSpecification {
+    public:
+        /**
+          \brief Should G3D spawn its own network thread?
+
+          If true, G3D will spawn a thread for network management on the first invocation of G3D::NetServer::create or
+          G3D::NetConnection::connectToServer.
+
+          If false and networking is used, the application must explicitly invoke G3D::serviceNetwork() regularly to allow the network
+          code to run.
+
+          In either case, the network API is threadsafe.
+
+          Default: true.
+        */
+        bool threadedNetworking = true;
+
+        /** Should AudioDevice be enabled? (It will still be initialized regardless of enabling.) Default: false. */
+        bool audio = false;
+
+        /** Audio DSP buffer length to use. Affects audio latency. Default: 1024. 
+        FMOD claims that the default results in 21.33 ms of latency at 48 khz (1024 / 48000 * 1000 = 21.33). */
+        unsigned int audioBufferLength = 1024;
+
+        /** Number of audio DSP buffers to use. Default: 4. */
+        int audioNumBuffers = 4;
+
+        /** Set parameters for deployment of a standalone application.
+            If true, disable System::findDataFile's ability to look in
+            the directory specified by the G3D10DATA environment variable. */
+        bool deployMode = false;
+
+        /** Name that Log::common() and logPrintf() use */
+        const char* logFilename = "log.txt";
+
+        /** Scale used by G3D::GuiWindow::pixelScale.
+            If -1, the scale automatically is chosen by the GuiWindow based on the 
+            primary display resolution. 4k = 2x, 8k = 4x */
+        float defaultGuiPixelScale = -1.0f;
+
+        G3DSpecification() {}
+
+        virtual ~G3DSpecification() {}
+    };
+
+
+    namespace _internal {
+        /** Set by initG3D, defined in initG3D.cpp */
+        G3DSpecification& g3dInitializationSpecification();
+    }
+}
+
+// See http://stackoverflow.com/questions/2670816/how-can-i-use-the-compile-time-constant-line-in-a-string
+// For use primarily with NUMBER_TO_STRING(__LINE__)
+#define NUMBER_TO_STRING(x) NUMBER_TO_STRING2(x)
+#define NUMBER_TO_STRING2(x) #x
+#define __LINE_AS_STRING__ NUMBER_TO_STRING(__LINE__)
+
+#ifdef nil
+#   undef nil
 #endif
+
+#if ! defined(G3D_WINDOWS) && ! defined(G3D_OSX)
+   // FMOD is not supported by G3D on other platforms...yet
+#    define G3D_NO_FMOD
+#endif
+
+/** \def G3D_MIN_OPENGL_VERSION
+    Minimum version of OpenGL required by G3D on this platform, mulitplied by 100 to create an integer, e.g., 330 = 3.30.
+    Assumes OpenGL core if > 300
+*/
+#define G3D_MIN_OPENGL_VERSION 410
+
+#define TBB_IMPLEMENT_CPP0X 0
+#define __TBB_NO_IMPLICIT_LINKAGE 1
+#define __TBBMALLOC_NO_IMPLICIT_LINKAGE 1
+#include <tbb/tbb.h>
